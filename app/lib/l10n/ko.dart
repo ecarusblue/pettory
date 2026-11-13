@@ -215,6 +215,8 @@ class Ko {
   static const sleepEnd = '기상';
   static const notify = '알림';
   static const sound = '사운드';
+  static const soundTest = '소리 들어 보기';
+  static const soundTestHint = '들리지 않으면 기기 음량을 올리고, 아이폰은 무음 스위치를 꺼 주세요';
   static const resetData = '데이터 초기화';
   static const resetConfirmTitle = '정말 초기화할까요?';
   static const resetConfirmBody = '펫과 모든 기록이 삭제돼요. 되돌릴 수 없어요.';

@@ -16,3 +16,4 @@ app/.flutter-plugins-dependencies
 # deploy tooling state
 .firebase/
 supabase/.temp/
+firebase-debug.log

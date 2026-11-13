@@ -1,3 +1,6 @@
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
+
 import 'package:web/web.dart' as web;
 
 import 'sfx.dart';
@@ -10,6 +13,32 @@ SfxPlayer createSfxPlayer() => WebSfxPlayer();
 class WebSfxPlayer implements SfxPlayer {
   web.AudioContext? _ctx;
   bool _failed = false;
+  web.HTMLAudioElement? _keepAlive;
+
+  // 소리가 없는 아주 짧은 WAV. 아이폰의 무음 스위치를 우회하는 데 쓴다.
+  static const _silentWav =
+      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+
+  /// iOS 는 Web Audio 를 '벨소리' 채널로 취급해 무음 스위치가 켜져 있으면 소리가 안 난다.
+  /// 오디오 세션을 '재생'으로 바꾸고(iOS 17+), 무음 <audio> 를 돌려(그 이전) 미디어 채널로 만든다.
+  /// 사용자 탭 안에서 처음 한 번만 호출한다. 실기기 동작은 자동 테스트로 검증되지 않았다.
+  void _unlockMediaChannel() {
+    try {
+      final session = (web.window.navigator as JSObject).getProperty(
+        'audioSession'.toJS,
+      );
+      if (session != null && session.isA<JSObject>()) {
+        (session as JSObject).setProperty('type'.toJS, 'playback'.toJS);
+      }
+    } catch (_) {}
+    try {
+      final a = web.document.createElement('audio') as web.HTMLAudioElement
+        ..src = _silentWav
+        ..loop = true;
+      _keepAlive = a;
+      a.play().toDart.catchError((_) => null);
+    } catch (_) {}
+  }
 
   static const _volume = 0.12; // 귀가 아프지 않게 낮게
 
@@ -17,6 +46,12 @@ class WebSfxPlayer implements SfxPlayer {
   void play(SfxKind kind) {
     if (_failed) return;
     try {
+      if (_ctx == null) _unlockMediaChannel();
+      // 앱이 백그라운드에 갔다 오면 iOS 가 멈춰 둔 무음 재생을 다시 켠다.
+      final keep = _keepAlive;
+      if (keep != null && keep.paused) {
+        keep.play().toDart.catchError((_) => null);
+      }
       final ctx = _ctx ??= web.AudioContext();
       if (ctx.state == 'suspended') ctx.resume();
       final t0 = ctx.currentTime;

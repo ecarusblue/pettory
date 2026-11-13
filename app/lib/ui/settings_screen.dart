@@ -81,6 +81,12 @@ class SettingsScreen extends StatelessWidget {
                 },
               ),
               ListTile(
+                title: const Text(Ko.soundTest),
+                subtitle: const Text(Ko.soundTestHint),
+                leading: const Icon(Icons.volume_up_outlined),
+                onTap: () => sfx.play(SfxKind.play),
+              ),
+              ListTile(
                 title: const Text(Ko.resetData),
                 leading: const Icon(Icons.delete_outline),
                 onTap: () async {
