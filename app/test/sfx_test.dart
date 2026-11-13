@@ -54,6 +54,23 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  test('여섯 케어 버튼은 서로 다른 소리를 낸다', () {
+    final kinds = {
+      for (final k in [
+        CareKind.feed,
+        CareKind.snack,
+        CareKind.play,
+        CareKind.cleanPoop,
+        CareKind.sleep,
+        CareKind.medicine,
+      ])
+        sfxForCare(k),
+    };
+    expect(kinds.length, 6);
+    // 실패음은 거친 톱니파가 아니라 부드러운 삼각파
+    expect(tonesFor(SfxKind.error).every((t) => t.wave == Wave.triangle), true);
+  });
+
   test('테스트 환경의 재생기는 요청을 기록만 한다', () {
     final p = sfx as RecordingSfxPlayer;
     p.played.clear();

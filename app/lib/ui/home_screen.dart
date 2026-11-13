@@ -81,13 +81,16 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 놀기: 한도/수면을 먼저 확인하고, 선택 시트(기본 / 미니게임)를 띄운다.
   Future<void> _onPlay() async {
     if (c.playLimitReached) {
+      playSfx(c, SfxKind.error);
       _snack(Ko.playLimitReached);
       return;
     }
     if (c.pet?.asleep ?? false) {
+      playSfx(c, SfxKind.error);
       _snack(Ko.careError(CareError.asleep));
       return;
     }
+    playSfx(c, SfxKind.button); // 놀이 선택창이 열리는 순간
     final choice = await showModalBottomSheet<_PlayChoice>(
       context: context,
       backgroundColor: PetoryColors.bg,

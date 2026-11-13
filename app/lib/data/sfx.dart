@@ -3,6 +3,7 @@ import 'sfx_stub.dart' if (dart.library.js_interop) 'sfx_web.dart' as impl;
 /// 효과음 종류. 소리는 음원 파일 없이 짧은 음 몇 개를 합성해서 낸다.
 enum SfxKind {
   tap,
+  button,
   feed,
   snack,
   play,
@@ -40,6 +41,7 @@ List<Tone> tonesFor(SfxKind k) => switch (k) {
     Tone(_g5, 0, .07, Wave.triangle),
     Tone(_c6, .07, .1, Wave.triangle),
   ],
+  SfxKind.button => const [Tone(988, 0, .05, Wave.triangle)],
   SfxKind.feed => const [
     Tone(_c5, 0, .07),
     Tone(_a4, .09, .07),
@@ -77,9 +79,10 @@ List<Tone> tonesFor(SfxKind k) => switch (k) {
     Tone(_e5, 0, .1, Wave.triangle),
     Tone(_a5, .12, .2, Wave.triangle),
   ],
+  // 안 되는 행동: 거슬리지 않게 부드럽게 내려가는 두 음 ("으응, 아니야")
   SfxKind.error => const [
-    Tone(196, 0, .12, Wave.sawtooth),
-    Tone(147, .12, .18, Wave.sawtooth),
+    Tone(294, 0, .1, Wave.triangle),
+    Tone(220, .12, .2, Wave.triangle),
   ],
   SfxKind.eggTap => const [Tone(1175, 0, .04)],
   SfxKind.hatch => const [
