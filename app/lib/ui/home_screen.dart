@@ -145,54 +145,73 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
               children: [
                 Row(
                   children: [
                     Expanded(
                       child: Semantics(
                         header: true,
-                        child: Text(
-                          '${pet.name}  ·  $stageText',
-                          style: t.titleLarge,
+                        // Jua 에는 '·' 글리프가 없어 단계 표기는 본문 폰트로 쓴다.
+                        child: Text.rich(
+                          TextSpan(
+                            text: pet.name,
+                            style: t.titleLarge,
+                            children: [
+                              TextSpan(
+                                text: '   $stageText',
+                                style: t.titleMedium?.copyWith(
+                                  fontFamily: 'NotoSansKR',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
                 SizedBox(
-                  height: 220,
+                  height: 236,
                   child: Semantics(
                     label:
                         '${pet.name}, $stageText'
                         '${pet.asleep ? ', ${Ko.sleepingNow}' : ''}'
                         '${pet.sick ? ', ${Ko.sickLabel}' : ''}',
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CustomPaint(
-                          size: const Size(double.infinity, 220),
-                          painter: PetPainter(
-                            stage: pet.stage,
-                            species: pet.species,
-                            sick: pet.sick,
-                            asleep: pet.asleep,
-                            tier: pet.adultTier,
-                          ),
-                        ),
-                        if (pet.asleep)
-                          const Positioned(
-                            top: 8,
-                            right: 48,
-                            child: Text(
-                              'Zzz',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: 240,
+                        height: 220,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            CustomPaint(
+                              size: const Size(240, 220),
+                              painter: PetPainter(
+                                stage: pet.stage,
+                                species: pet.species,
+                                sick: pet.sick,
+                                asleep: pet.asleep,
+                                tier: pet.adultTier,
                               ),
                             ),
-                          ),
-                      ],
+                            if (pet.asleep)
+                              const Positioned(
+                                top: 0,
+                                right: 8,
+                                child: Text(
+                                  'Zzz',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

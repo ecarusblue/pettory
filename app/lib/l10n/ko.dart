@@ -3,6 +3,26 @@ import '../domain/domain.dart';
 /// 한국어 문자열 모음 (다국어 확장 대비 외부화).
 class Ko {
   Ko._();
+
+  // 조사: 마지막 글자의 받침 유무로 고른다 (한글이 아니면 받침 없음으로 본다).
+  static bool _hasBatchim(String w) {
+    if (w.isEmpty) return false;
+    final c = w.runes.last;
+    return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 != 0;
+  }
+
+  static bool _isRieul(String w) =>
+      w.isNotEmpty &&
+      w.runes.last >= 0xAC00 &&
+      w.runes.last <= 0xD7A3 &&
+      (w.runes.last - 0xAC00) % 28 == 8;
+
+  /// 이/가
+  static String iga(String w) => '$w${_hasBatchim(w) ? '이' : '가'}';
+
+  /// 으로/로 (ㄹ 받침은 '로')
+  static String euro(String w) =>
+      '$w${_hasBatchim(w) && !_isRieul(w) ? '으로' : '로'}';
   static const appName = '펫토리';
 
   // 온보딩
@@ -71,16 +91,16 @@ class Ko {
 
   // 진화/떠남
   static String evolved(String name, Stage s) =>
-      '$name이(가) ${stageName(s)}(으)로 자랐어요!';
+      '${iga(name)} ${euro(stageName(s))} 자랐어요!';
   static String adultDecided(String name, Tier t) =>
       '$name의 성체 모습이 정해졌어요: ${tierName(t)}';
   static const ok = '확인';
-  static String leftTitle(String name) => '$name이(가) 먼 여행을 떠났어요';
+  static String leftTitle(String name) => '${iga(name)} 먼 여행을 떠났어요';
   static const leftBody = '함께한 시간은 추억 상자에 소중히 남았어요.\n새 알과 다시 시작할 수 있어요.';
   static const newEgg = '새 알 만나기';
 
   // 복귀 안내 (FR-9)
-  static String awayTitle(String name) => '$name이(가) 기다렸어요';
+  static String awayTitle(String name) => '${iga(name)} 기다렸어요';
   static const awayHeading = '자리를 비운 동안';
   static String awayElapsed(int minutes) => '${durationDH(minutes)} 만에 돌아왔어요';
   static const awayConfirm = '확인했어요';
@@ -98,7 +118,7 @@ class Ko {
   static const awayRecovered = '건강을 되찾았어요';
   static const awayEvolutionNote = '그사이 자라난 모습이 있어요. 확인하면 차례로 보여 드릴게요.';
   static String awayEvolutionCount(int n) => '성장 소식 $n건';
-  static String awayLeftTitle(String name) => '$name이(가) 먼 여행을 떠났어요';
+  static String awayLeftTitle(String name) => '${iga(name)} 먼 여행을 떠났어요';
   static String awayLeftBody(String elapsed) =>
       '$elapsed 동안 만나지 못했어요. 아픈 채로 오래 기다리다 길을 나섰나 봐요. '
       '자책하지 않아도 괜찮아요. 함께한 시간은 추억 상자에 소중히 남았어요.';

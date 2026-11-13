@@ -94,9 +94,13 @@ class PetPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rows = spriteFor(stage);
     final cols = rows.map((r) => r.length).reduce((a, b) => a > b ? a : b);
-    final cell = (size.width / cols).clamp(0, size.height / rows.length);
+    // 칸 크기 상한: 화면이 넓어도 캐릭터가 폭을 다 채우지 않게 하고, 단계별로 커 보이게 한다.
+    final cell = (size.width / cols)
+        .clamp(0, size.height / rows.length)
+        .clamp(0, 20.0);
     final w = cell * cols, h = cell * rows.length;
-    final ox = (size.width - w) / 2, oy = (size.height - h) / 2;
+    final ox = (size.width - w) / 2,
+        oy = size.height - h; // 바닥 정렬: 단계마다 같은 바닥선 위에 선다
     var body = PetoryColors.species(species);
     if (sick) body = Color.lerp(body, const Color(0xFFB8C98A), 0.55)!;
     if (silhouette) body = PetoryColors.empty;
