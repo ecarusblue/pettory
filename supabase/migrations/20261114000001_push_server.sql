@@ -1,0 +1,1 @@
+../../server/migrations/0001_push_server.sql

@@ -12,3 +12,7 @@ app/.flutter-plugins-dependencies
 # secrets
 .env
 .env.*
+
+# deploy tooling state
+.firebase/
+supabase/.temp/

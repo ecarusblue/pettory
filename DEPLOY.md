@@ -10,15 +10,18 @@ cp .firebaserc.example .firebaserc # <STAGING_PROJECT_ID> 채우기
 ```
 
 ## 1. Supabase (스테이징 프로젝트)
+CLI는 `supabase/` 폴더 구조를 요구하므로 저장소 루트의 `supabase/`는 `server/`로 향하는 심볼릭 링크입니다
+(`supabase/migrations/<타임스탬프>_*.sql` → `server/migrations/000N_*.sql`, `supabase/functions` → `server/functions`,
+`supabase/src` → `server/src`; 함수의 `../../src` import가 링크 경로 기준으로 해석되므로 `src` 링크도 필요). 원본은 항상 `server/`.
 ```bash
-cd server
-supabase link --project-ref <STAGING_REF>
-supabase db push                    # 0001 → 0002 → 0003
+supabase link --project-ref <STAGING_REF>   # 저장소 루트에서
+supabase db push --remote           # 로컬 스택이 아니라 원격에 적용하려면 --remote 필수
+# 이미 SQL을 수동 적용했다면: supabase migration repair --status applied <버전...> --remote
 npx web-push generate-vapid-keys    # 결과는 저장소에 커밋하지 말 것
 supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... \
   VAPID_SUBJECT=mailto:<연락처> DISPATCH_SECRET=$(openssl rand -hex 32) \
   ALLOWED_ORIGIN=https://<STAGING_PROJECT_ID>.web.app
-supabase functions deploy subscribe schedule time dispatch --no-verify-jwt
+supabase functions deploy subscribe schedule time dispatch --no-verify-jwt --use-api   # Docker 불필요
 ```
 - `pg_cron`/`pg_net` 확장을 켜고 `server/README.md`의 스케줄러 SQL을 등록(비밀값은 Vault).
 - 추가로 rate limit 정리용: `select cron.schedule('petory-purge-rl','0 * * * *',$$select public.purge_rate_limit(now() - interval '1 hour')$$);`
