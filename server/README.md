@@ -4,6 +4,7 @@ Supabase(Postgres + Edge Functions + pg_cron) 기준의 최소 Web Push 서버. 
 
 ## 구조
 - `migrations/0001_push_server.sql`: 테이블, RLS(정책 없음 = anon 접근 불가), 원자적 교체 함수
+- `migrations/0003_rate_limit.sql`: 전역 rate limit 테이블/RPC
 - `migrations/0002_claims_and_dedupe.sql`: 디스패치 선점(`claimed_at`/`claim_token`, `claim_due_pushes()` = `FOR UPDATE SKIP LOCKED`), `dedupe_key` 부분 unique 인덱스, `replace_schedule` 재정의(전송 중 행 보존). 0001 다음에 `supabase db push`로 순서대로 적용
 - `src/`: 런타임 비종속 순수 TypeScript (검증, 취침 보정, 상한, 디스패치, 핸들러, MemoryStore, FakeSender, `endpoint_policy.ts` 푸시 호스트 허용 목록, `rate_limit.ts` RateLimiter 인터페이스+메모리 구현, `body_limit.ts` 본문 8KB 제한)
 - `functions/`: Edge Function 얇은 엔트리(subscribe, schedule, time, dispatch)와 `_shared/`(Supabase 저장소, web-push 전송, HTTP 글루)
@@ -54,7 +55,7 @@ $$);
 ## 동시 실행·남용 방어 요약
 - 디스패치: 행을 먼저 claim → 전송 → `sent_at` 기록. 일시 오류/타임아웃은 claim 해제 후 재시도, 5분 넘은 claim은 회수. pg_cron이 겹쳐 호출돼도 중복 발송하지 않습니다(한계: 아래 "알려진 한계").
 - 테스트에서 엔드포인트 정책은 `Deps.endpointPolicy`로 주입(`test/helpers.ts`의 `testEndpointPolicy`). 전송 타임아웃/예산은 `runDispatch(deps, { sendTimeoutMs, budgetMs, clock })`.
-- rate limit: `RateLimiter` 인터페이스(`allow(key, now)`). Edge Function은 isolate별 메모리 구현(30회/분, IP·endpoint 키)이라 폭주를 누그러뜨리는 정도이며, **TODO**: Supabase에서는 Postgres 카운터 RPC 또는 Redis 구현으로 교체(`functions/_shared/limits.ts`).
+- rate limit: `RateLimiter` 인터페이스(`allow(key, now)`). Edge Function은 isolate별 메모리 구현(30회/분, IP·endpoint 키)이라 폭주를 누그러뜨리는 정도이며, 운영에서는 `functions/_shared/limits.ts`의 Postgres 카운터(`migrations/0003_rate_limit.sql`의 `hit_rate_limit`, 키는 SHA-256 해시)가 전역으로 제한하고, RPC 실패 시 메모리 구현으로 폴백합니다. 만료 행은 `purge_rate_limit`로 주기 삭제(pg_cron 권장).
 - 본문은 8KB 초과 시 413.
 
 ### 알려진 한계

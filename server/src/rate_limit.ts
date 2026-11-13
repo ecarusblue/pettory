@@ -3,9 +3,8 @@
  * Handlers only see this interface. Keys are opaque strings such as "subscribe:ip:1.2.3.4"
  * or "schedule:ep:<endpoint>".
  *
- * TODO(supabase): MemoryRateLimiter is per Edge Function isolate, so it only softens bursts.
- * For a real limit back it with a table/RPC (e.g. `hit_rate_limit(key, window)` upserting a
- * counter row) or Upstash/Redis, behind this same interface.
+ * MemoryRateLimiter is per Edge Function isolate (tests, fallback). Production uses the
+ * Postgres-backed limiter in functions/_shared/limits.ts (migration 0003, `hit_rate_limit`).
  */
 export interface RateLimiter {
   /** true = request allowed (and counted), false = over the limit. */
