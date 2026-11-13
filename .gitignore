@@ -1,0 +1,14 @@
+# dependencies / build output
+node_modules/
+app/build/
+app/.dart_tool/
+app/.flutter-plugins-dependencies
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+
+# secrets
+.env
+.env.*
