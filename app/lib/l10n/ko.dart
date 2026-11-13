@@ -70,6 +70,23 @@ class Ko {
   };
   static const sleepingNow = '쿨쿨 자는 중';
 
+  // 기분·반응 (홈 캐릭터)
+  static const moodHappy = '기분이 좋아요';
+  static const moodSad = '시무룩해요';
+  static const petHint = '쓰다듬기';
+  static const petHappy = '헤헤, 좋아요!';
+  static const petAsleep = '쿨쿨…';
+  static const petSick = '끙… 아파요';
+  static String careReaction(CareKind k) => switch (k) {
+    CareKind.feed => '냠냠, 잘 먹었어요!',
+    CareKind.snack => '아삭아삭!',
+    CareKind.play || CareKind.minigame => '신나요!',
+    CareKind.cleanPoop => '깨끗해졌어요!',
+    CareKind.sleep => '잘 자요…',
+    CareKind.wake => '좋은 아침!',
+    CareKind.medicine => '고마워요, 나을게요',
+  };
+
   // 케어 버튼
   static const feed = '밥';
   static const snack = '간식';

@@ -71,6 +71,9 @@ List<String> spriteFor(Stage s) => switch (s) {
   Stage.adult => _adult,
 };
 
+/// 표정용 기분. 눈 바로 아래 칸에 볼터치(happy) 또는 눈물(sad)을 그린다.
+enum PetMood { neutral, happy, sad }
+
 /// 임시 픽셀 스프라이트 페인터 (외주 아트 도착 전 자리표시자).
 class PetPainter extends CustomPainter {
   PetPainter({
@@ -80,7 +83,9 @@ class PetPainter extends CustomPainter {
     this.asleep = false,
     this.tier,
     this.silhouette = false,
+    this.mood = PetMood.neutral,
   });
+  final PetMood mood;
   final Stage stage;
   final Species species;
   final bool sick;
@@ -134,6 +139,31 @@ class PetPainter extends CustomPainter {
         canvas.drawRect(rect, p);
       }
     }
+    if (!silhouette && mood != PetMood.neutral && stage != Stage.egg) {
+      // 눈(첫 'k' 줄) 바로 아래 칸: 기분 좋으면 분홍 볼, 시무룩하면 파란 눈물.
+      final eyeRow = rows.indexWhere((r) => r.contains('k'));
+      if (eyeRow >= 0 && eyeRow + 1 < rows.length) {
+        final p = Paint()
+          ..color = mood == PetMood.happy
+              ? const Color(0xFFFF8FA3)
+              : const Color(0xFF3F7CD8);
+        for (var x = 0; x < rows[eyeRow].length; x++) {
+          if (rows[eyeRow][x] != 'k') continue;
+          if (x >= rows[eyeRow + 1].length || rows[eyeRow + 1][x] != '#') {
+            continue;
+          }
+          canvas.drawRect(
+            Rect.fromLTWH(
+              ox + x * cell,
+              oy + (eyeRow + 1) * cell,
+              cell + 0.5,
+              cell + 0.5,
+            ),
+            p,
+          );
+        }
+      }
+    }
     if (!silhouette && tier != null && stage == Stage.adult) {
       // 성체 등급 표식 (색 외에 모양): 우수=별, 보통=동그라미, 방치=네모
       final mark = Paint()..color = PetoryColors.accent;
@@ -170,5 +200,6 @@ class PetPainter extends CustomPainter {
       o.sick != sick ||
       o.asleep != asleep ||
       o.tier != tier ||
-      o.silhouette != silhouette;
+      o.silhouette != silhouette ||
+      o.mood != mood;
 }

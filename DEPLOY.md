@@ -29,12 +29,14 @@ supabase functions deploy subscribe schedule time dispatch --no-verify-jwt --use
 ## 2. 앱 빌드 + Firebase Hosting
 ```bash
 cd app
-flutter build web --release \
+flutter build web --release --no-web-resources-cdn --web-content-hash \
   --dart-define=PETORY_PUSH_BASE_URL=https://<STAGING_REF>.supabase.co/functions/v1 \
   --dart-define=PETORY_VAPID_PUBLIC_KEY=<VAPID_PUBLIC_KEY>
 cd .. && firebase deploy --only hosting
 ```
-(`firebase.json`의 서비스 워커 파일은 no-cache 헤더로 서빙됩니다.)
+(`--web-content-hash`가 없으면 `precache_manifest.json`이 만들어지지 않아 오프라인 캐시(`app_sw.js`)가 설치되지 않습니다. `firebase.json`은 index·서비스 워커·매니페스트를 no-cache로 서빙합니다.)
+
+설치 안내 페이지: `https://<STAGING_PROJECT_ID>.web.app/install.html` (`app/web/install.html`, 아이폰·안드로이드 설치 방법 한 페이지).
 
 ## 3. 스테이징 검증 (실제 기기, HTTPS)
 - [ ] 마이그레이션 3개가 오류 없이 적용됨

@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#E9F7EF",
   "theme_color": "#E9F7EF",
-  "description": "주머니 속 작은 친구를 키우는 가상 반려 게임 (가칭)",
+  "description": "주머니 속 작은 친구를 키우는 가상 반려 게임",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [
@@ -33,5 +33,9 @@
     }
   ],
   "scope": ".",
-  "lang": "ko"
+  "lang": "ko",
+  "id": "/",
+  "categories": [
+    "games"
+  ]
 }

@@ -6,7 +6,7 @@ import '../l10n/ko.dart';
 import 'dex_screen.dart';
 import 'gauge.dart';
 import 'minigame_screen.dart';
-import 'pet_painter.dart';
+import 'pet_stage.dart';
 import 'poop_icon.dart';
 import 'settings_screen.dart';
 import 'theme.dart';
@@ -22,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   GameController get c => widget.controller;
   bool _showingEvolution = false;
+  String? _reaction;
+  int _reactionSerial = 0;
 
   void _maybeShowEvolution() {
     if (_showingEvolution || !c.hasPendingEvolutions) return;
@@ -54,7 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _do(CareAction a) {
     final r = c.care(a);
-    if (!r.ok) {
+    if (r.ok) {
+      setState(() {
+        _reaction = Ko.careReaction(a.kind);
+        _reactionSerial++;
+      });
+    } else {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(Ko.careError(r.error!))));
@@ -172,49 +179,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 236,
-                  child: Semantics(
-                    label:
-                        '${pet.name}, $stageText'
-                        '${pet.asleep ? ', ${Ko.sleepingNow}' : ''}'
-                        '${pet.sick ? ', ${Ko.sickLabel}' : ''}',
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: 240,
-                        height: 220,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            CustomPaint(
-                              size: const Size(240, 220),
-                              painter: PetPainter(
-                                stage: pet.stage,
-                                species: pet.species,
-                                sick: pet.sick,
-                                asleep: pet.asleep,
-                                tier: pet.adultTier,
-                              ),
-                            ),
-                            if (pet.asleep)
-                              const Positioned(
-                                top: 0,
-                                right: 8,
-                                child: Text(
-                                  'Zzz',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                PetStage(
+                  pet: pet,
+                  semanticsLabel:
+                      '${pet.name}, $stageText'
+                      '${pet.asleep ? ', ${Ko.sleepingNow}' : ''}'
+                      '${pet.sick ? ', ${Ko.sickLabel}' : ''}',
+                  reaction: _reaction,
+                  reactionSerial: _reactionSerial,
                 ),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

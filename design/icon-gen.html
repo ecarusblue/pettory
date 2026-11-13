@@ -1,0 +1,65 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>펫토리 아이콘 생성기</title>
+<style>
+  @font-face { font-family: "Jua"; src: url("../app/assets/fonts/Jua-Regular.ttf"); }
+  body { margin: 0; background: #888; font-family: sans-serif; color: #fff; padding: 12px; }
+  canvas { margin: 4px; image-rendering: pixelated; }
+</style>
+<p>펫토리 로고 A(알 세 개 + 글자)에서 앱 아이콘 PNG를 만듭니다. <code>window.OUT</code> 에 data URL 이 담깁니다.</p>
+<div id="v"></div>
+<script>
+  // 앱 pet_painter.dart 와 같은 규격의 알 스프라이트
+  const EGG = ['....##....','..######..','.########.','.##w#####.','##########','#####w####','##########','##########','.########.','.########.','..######..'];
+  const CRACK = ['....##....','..######..','.########.','.##w#####.','##########','cc###c###c','##c#c#c#c#','###c###c##','##########','.########.','..######..'];
+  const NAVY = '#1F2A44', MINT = '#7FD6B0', PEACH = '#FFC48A', SKY = '#8EC9F5', PAPER = '#E9F7EF';
+
+  function egg(ctx, rows, body, x0, y0, cell) {
+    rows.forEach((row, y) => [...row].forEach((c, x) => {
+      if (c === '.') return;
+      const px = Math.round(x0 + x * cell), py = Math.round(y0 + y * cell), n = Math.ceil(cell);
+      ctx.fillStyle = c === 'c' ? NAVY : body;
+      ctx.fillRect(px, py, n, n);
+      if (c === 'w') { ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillRect(px, py, n, n); }
+    }));
+  }
+
+  // kind: 'lockup' (알 세 개 + 글자) | 'single' (금 간 알 하나, 파비콘)
+  function draw(S, kind, safe) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = S;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = NAVY; ctx.fillRect(0, 0, S, S);
+    if (kind === 'single') {
+      const cell = Math.max(1, Math.floor(S * 0.8 / 11));
+      egg(ctx, CRACK, PEACH, (S - 10 * cell) / 2, (S - 11 * cell) / 2, cell);
+      return cv;
+    }
+    const cell = Math.round(S * safe / 34);             // 34칸 = 알 3개(10칸) + 사이 2칸 x 2
+    const rowW = 34 * cell, eggH = 11 * cell;
+    const fs = Math.round(rowW * 0.27);                  // 글자 크기: 알 줄 폭의 약 8할
+    const gap = Math.round(cell * 3);
+    const total = eggH + gap + fs * 0.9;
+    const top = (S - total) / 2, left = (S - rowW) / 2;
+    egg(ctx, EGG, MINT, left, top, cell);
+    egg(ctx, CRACK, PEACH, left + 12 * cell, top, cell);
+    egg(ctx, EGG, SKY, left + 24 * cell, top, cell);
+    ctx.fillStyle = PAPER; ctx.font = fs + 'px Jua'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('펫토리', S / 2, top + eggH + gap + fs * 0.82);
+    return cv;
+  }
+
+  window.OUT = {};
+  document.fonts.load('100px Jua', '펫토리').then(() => {
+    const jobs = {
+      'Icon-192.png': [192, 'lockup', 0.86], 'Icon-512.png': [512, 'lockup', 0.86],
+      'Icon-maskable-192.png': [192, 'lockup', 0.66], 'Icon-maskable-512.png': [512, 'lockup', 0.66],
+      'favicon.png': [32, 'single', 0],
+    };
+    for (const [name, [S, kind, safe]] of Object.entries(jobs)) {
+      const cv = draw(S, kind, safe);
+      window.OUT[name] = cv.toDataURL('image/png');
+      document.getElementById('v').appendChild(cv);
+    }
+    window.DONE = true;
+  });
+</script>

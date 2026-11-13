@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>펫토리 로고 시안</title>
+<style>
+  @font-face { font-family: "Jua"; src: url("../app/assets/fonts/Jua-Regular.ttf"); }
+  :root {
+    --mint-bg: #E9F7EF; --ink: #1F2A44; --coral: #FF7A66; --coral-deep: #D9503C;
+    --egg-mint: #7FD6B0; --egg-peach: #FFC48A; --egg-sky: #8EC9F5; --paper: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--mint-bg); color: var(--ink); font-family: "Jua", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 28px; font-weight: 400; margin: 0 0 4px; }
+  .lead { font-family: system-ui, "Noto Sans KR", sans-serif; font-size: 15px; line-height: 1.6; margin: 0 0 28px; max-width: 60ch; }
+  .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+  .card { background: var(--paper); border: 2px solid var(--ink); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .stage { min-height: 220px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--mint-bg); }
+  .stage.dark { background: var(--ink); }
+  .name { font-size: 20px; margin: 0; }
+  .note { font-family: system-ui, "Noto Sans KR", sans-serif; font-size: 14px; line-height: 1.6; margin: 0; }
+  .sizes { display: flex; align-items: flex-end; gap: 14px; }
+  .sizes small { font-family: system-ui, sans-serif; font-size: 11px; display: block; text-align: center; margin-top: 4px; }
+  svg { display: block; shape-rendering: crispEdges; }
+
+  /* 시안 A: 알 세 개 */
+  .lockup-a { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .eggs { display: flex; gap: 14px; align-items: flex-end; }
+  .word { font-size: 64px; line-height: 1; letter-spacing: 2px; color: var(--ink); }
+
+  /* 시안 C: 글자 뒤에서 내다보는 아기 */
+  .word-c { font-size: 72px; line-height: 1; letter-spacing: 2px; display: inline-flex; padding-top: 44px; }
+  .peek { position: relative; display: inline-block; }
+  .peek svg { position: absolute; left: 50%; top: -34px; transform: translateX(-50%); }
+  .peek span { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1>펫토리 로고 시안 3종</h1>
+  <p class="lead">모두 앱 안의 픽셀 알·아기 스프라이트와 같은 칸 규격으로 그렸고, 색은 앱 팔레트(민트·살구·하늘 알, 남색 글자, 코럴 포인트)만 씁니다. 글자는 앱 제목 폰트(Jua)입니다.</p>
+
+  <div class="grid">
+    <section class="card">
+      <div class="stage"><div class="lockup-a">
+        <div class="eggs" id="a-eggs"></div>
+        <div class="word">펫토리</div>
+      </div></div>
+      <h2 class="name">A. 알 세 개</h2>
+      <p class="note">고를 수 있는 알 3종이 그대로 로고가 됩니다. 가운데 알만 금이 가서 “곧 태어난다”는 게임의 첫 장면을 말합니다. 가로형이라 스플래시와 상점 배너에 맞습니다.</p>
+    </section>
+
+    <section class="card">
+      <div class="stage dark"><div id="b-icon"></div></div>
+      <h2 class="name">B. 금 간 알 아이콘</h2>
+      <p class="note">앱 아이콘용 한 장짜리 마크입니다. 지그재그 금 하나로 “곧 태어난다”를 말합니다. 작은 크기에서도 실루엣(타원 + 지그재그)이 남습니다.</p>
+      <div class="sizes" id="b-sizes"></div>
+    </section>
+
+    <section class="card">
+      <div class="stage"><div class="word-c">
+        <span>펫</span><span class="peek"><span>토</span><div id="c-baby"></div></span><span>리</span>
+      </div></div>
+      <h2 class="name">C. 글자 뒤의 아기</h2>
+      <p class="note">글자만으로 쓰는 로고타입에 아기가 “토” 위로 빼꼼 얼굴을 내밉니다. 가장 가볍고 친근한 톤이고, 아기 대신 어린이·성체 스프라이트로 바꿔 시즌 로고로 확장할 수 있습니다.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+  // '#' 몸, 'k' 눈·입, 'w' 하이라이트, 'c' 금(남색), '.' 빈칸 — 앱의 pet_painter.dart 와 같은 규격
+  const EGG = [
+    '....##....', '..######..', '.########.', '.##w#####.', '##########',
+    '#####w####', '##########', '##########', '.########.', '.########.', '..######..'];
+  const EGG_CRACK = [
+    '....##....', '..######..', '.########.', '.##w#####.', '##########',
+    'cc###c###c', '##c#c#c#c#', '###c###c##', '##########', '.########.', '..######..'];
+  const BABY = [
+    '..######..', '.########.', '.#k####k#.', '.########.', '.###kk###.', '..######..'];
+
+  function sprite(rows, body, px, opts = {}) {
+    const ink = opts.ink || '#1F2A44';
+    const w = rows[0].length, h = rows.length;
+    let r = '';
+    rows.forEach((row, y) => [...row].forEach((c, x) => {
+      if (c === '.') return;
+      const fill = c === 'k' || c === 'c' ? (opts.crack || ink) : c === 'w' ? 'rgba(255,255,255,.8)' : body;
+      r += `<rect x="${x * px}" y="${y * px}" width="${px + .5}" height="${px + .5}" fill="${fill}"/>`;
+    }));
+    return `<svg width="${w * px}" height="${h * px}" viewBox="0 0 ${w * px} ${h * px}" role="img" aria-label="로고 마크">${r}</svg>`;
+  }
+
+  // A
+  document.getElementById('a-eggs').innerHTML =
+    sprite(EGG, '#7FD6B0', 7) + sprite(EGG_CRACK, '#FFC48A', 7) + sprite(EGG, '#8EC9F5', 7);
+
+  // B: 남색 배경에 민트 알, 금은 배경색(남색)
+  document.getElementById('b-icon').innerHTML = sprite(EGG_CRACK, '#7FD6B0', 14, { ink: '#1F2A44', crack: '#1F2A44' });
+  const sizes = [[64, 6], [40, 4], [24, 2.4]];
+  document.getElementById('b-sizes').innerHTML = sizes.map(([box, px]) =>
+    `<div><div style="width:${box}px;height:${box}px;border-radius:${box * .22}px;background:#1F2A44;display:flex;align-items:center;justify-content:center">${sprite(EGG_CRACK, '#7FD6B0', px)}</div><small>${box}px</small></div>`
+  ).join('');
+
+  // C
+  document.getElementById('c-baby').innerHTML = sprite(BABY, '#7FD6B0', 5);
+</script>
+</body>
+</html>
