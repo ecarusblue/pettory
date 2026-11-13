@@ -6,6 +6,8 @@ import 'package:material_ui/material_ui.dart';
 import '../app/game_controller.dart';
 import '../domain/domain.dart';
 import '../l10n/ko.dart';
+import '../data/sfx.dart';
+import 'play_sfx.dart';
 import 'theme.dart';
 
 enum _Phase { intro, waiting, signal, roundDone, result }
@@ -71,6 +73,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
 
   void _finishRound(RoundResult r) {
     _timer?.cancel();
+    playSfx(c, r.failed ? SfxKind.mgMiss : SfxKind.mgHit);
     setState(() {
       _rounds.add(r);
       _phase = _Phase.roundDone;
@@ -85,6 +88,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
     // 결과 확정: 점수 → 행복 증가량, 컨트롤러로 한 번만 적용
     final gain = gainForRounds(_rounds);
     final res = c.care(CareAction.minigame(gain));
+    if (res.ok && gain > 0) playSfx(c, SfxKind.mgWin);
     setState(() {
       _gain = gain;
       _error = res.ok ? null : res.error;

@@ -25,6 +25,7 @@ class PetStage extends StatefulWidget {
     required this.semanticsLabel,
     this.reaction,
     this.reactionSerial = 0,
+    this.onPet,
   });
   final PetState pet;
   final String semanticsLabel;
@@ -32,6 +33,9 @@ class PetStage extends StatefulWidget {
   /// 케어 직후 보여 줄 말풍선 문구.
   final String? reaction;
   final int reactionSerial;
+
+  /// 쓰다듬었을 때(효과음용).
+  final VoidCallback? onPet;
 
   @override
   State<PetStage> createState() => _PetStageState();
@@ -66,6 +70,7 @@ class _PetStageState extends State<PetStage>
   }
 
   void _pet() {
+    widget.onPet?.call();
     final p = widget.pet;
     _play(
       p.asleep

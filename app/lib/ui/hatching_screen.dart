@@ -3,7 +3,9 @@ import 'package:material_ui/material_ui.dart';
 import '../app/game_controller.dart';
 import '../domain/domain.dart';
 import '../l10n/ko.dart';
+import '../data/sfx.dart';
 import 'pet_painter.dart';
+import 'play_sfx.dart';
 
 /// 임시 부화: 알 탭 10회 또는 3분 자동 (PRD FR-2).
 class HatchingScreen extends StatefulWidget {
@@ -86,6 +88,7 @@ class _HatchingScreenState extends State<HatchingScreen>
 
   void _tap() {
     _wobble.forward(from: 0);
+    playSfx(widget.controller, SfxKind.eggTap);
     widget.controller.tapEgg();
   }
 }
@@ -110,6 +113,7 @@ class _HatchRevealScreenState extends State<HatchRevealScreen> {
   @override
   void initState() {
     super.initState();
+    playSfx(widget.controller, SfxKind.hatch);
     Future<void>.delayed(const Duration(seconds: 3), _finish);
   }
 

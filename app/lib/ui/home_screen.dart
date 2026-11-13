@@ -6,7 +6,9 @@ import '../l10n/ko.dart';
 import 'dex_screen.dart';
 import 'gauge.dart';
 import 'minigame_screen.dart';
+import '../data/sfx.dart';
 import 'pet_stage.dart';
+import 'play_sfx.dart';
 import 'poop_icon.dart';
 import 'settings_screen.dart';
 import 'theme.dart';
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       final events = c.takePendingEvolutions();
       final pet = c.pet;
+      if (events.isNotEmpty) playSfx(c, SfxKind.evolve);
       for (final e in events) {
         if (!mounted || pet == null) break;
         final msg = e.kind == SimEventKind.adultFormDecided
@@ -56,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _do(CareAction a) {
     final r = c.care(a);
+    playSfx(c, r.ok ? sfxForCare(a.kind) : SfxKind.error);
     if (r.ok) {
       setState(() {
         _reaction = Ko.careReaction(a.kind);
@@ -185,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       '${pet.name}, $stageText'
                       '${pet.asleep ? ', ${Ko.sleepingNow}' : ''}'
                       '${pet.sick ? ', ${Ko.sickLabel}' : ''}',
+                  onPet: () => playSfx(c, SfxKind.tap),
                   reaction: _reaction,
                   reactionSerial: _reactionSerial,
                 ),

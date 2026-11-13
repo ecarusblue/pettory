@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../app/game_controller.dart';
 import '../l10n/ko.dart';
+import '../data/sfx.dart';
 import 'push_prompt.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -74,8 +75,10 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 title: const Text(Ko.sound),
                 value: s.soundEnabled,
-                onChanged: (v) =>
-                    controller.updateSettings(s.copyWith(soundEnabled: v)),
+                onChanged: (v) {
+                  controller.updateSettings(s.copyWith(soundEnabled: v));
+                  if (v) sfx.play(SfxKind.tap); // 켠 순간 미리 들려 준다
+                },
               ),
               ListTile(
                 title: const Text(Ko.resetData),
