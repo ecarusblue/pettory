@@ -23,7 +23,7 @@ supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... \
   ALLOWED_ORIGIN=https://<STAGING_PROJECT_ID>.web.app
 supabase functions deploy subscribe schedule time dispatch --no-verify-jwt --use-api   # Docker 불필요
 ```
-- `pg_cron`/`pg_net` 확장을 켜고 `server/README.md`의 스케줄러 SQL을 등록(비밀값은 Vault).
+- 스케줄러(pg_cron + pg_net, 매분 `dispatch` 호출)와 rate limit 정리 작업은 `bash server/scripts/register-scheduler.sh` 한 번으로 등록합니다. 새 `DISPATCH_SECRET`을 만들어 함수 시크릿과 Vault에 함께 저장하며 화면에 출력하지 않습니다. 먼저 `DRY_RUN=1 bash server/scripts/register-scheduler.sh`로 실행할 SQL을 볼 수 있습니다.
 - 추가로 rate limit 정리용: `select cron.schedule('petory-purge-rl','0 * * * *',$$select public.purge_rate_limit(now() - interval '1 hour')$$);`
 
 ## 2. 앱 빌드 + Firebase Hosting
