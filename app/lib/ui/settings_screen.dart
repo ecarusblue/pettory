@@ -113,6 +113,33 @@ class SettingsScreen extends StatelessWidget {
                   }
                 },
               ),
+              if (controller.updater.supported)
+                ListTile(
+                  key: const Key('force-refresh'),
+                  title: const Text(Ko.forceRefresh),
+                  subtitle: const Text(Ko.forceRefreshHint),
+                  leading: const Icon(Icons.refresh),
+                  onTap: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text(Ko.forceRefreshConfirmTitle),
+                        content: const Text(Ko.forceRefreshConfirmBody),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text(Ko.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text(Ko.refresh),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok == true) await controller.updater.forceRefresh();
+                  },
+                ),
               if (showDevOptions)
                 ExpansionTile(
                   title: const Text(Ko.devOptions),

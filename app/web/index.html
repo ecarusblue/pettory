@@ -56,13 +56,92 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
-  <!-- 앱 셸 오프라인 캐시(app_sw.js). 푸시용 push_sw.js 는 ./push-scope/ 에 따로 등록되어 서로 독립. -->
+  <!-- 앱 셸 오프라인 캐시(app_sw.js)와 업데이트 확인. 푸시용 push_sw.js 는 ./push-scope/ 에 따로 등록되어 서로 독립. -->
   <script>
-    if ('serviceWorker' in navigator) {
+    // window.petoryUpdate: Dart(lib/data/app_updater_web.dart)가 쓰는 업데이트 API.
+    //  - 빌드마다 달라지는 precache_manifest.json 의 해시를 app_sw.js?v=<해시> 로 등록해, 서비스 워커 파일이
+    //    그대로여도 새 빌드를 감지한다(스크립트 URL 이 바뀌면 브라우저가 새 워커를 설치해 대기시킨다).
+    //  - isReady()/onReady(cb): 새 버전이 설치돼 대기 중인가. apply(): 대기 워커를 즉시 적용하고 다시 불러온다.
+    //  - force(): 앱 셸 서비스 워커와 petory- 캐시만 지우고 다시 불러온다(저장 데이터·푸시 구독은 건드리지 않는다).
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      var sw = navigator.serviceWorker;
+      var ready = false, listeners = [], reg = null;
+      function setReady() {
+        if (ready) return;
+        ready = true;
+        listeners.slice().forEach(function (f) { try { f(); } catch (e) {} });
+      }
+      function hash(str) {
+        var h = 5381;
+        for (var i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+        return h.toString(36);
+      }
+      function watch(r) {
+        reg = r;
+        if (r.__petoryWatched) return;
+        r.__petoryWatched = true;
+        if (r.waiting && sw.controller) setReady();
+        r.addEventListener('updatefound', function () {
+          var w = r.installing;
+          if (!w) return;
+          w.addEventListener('statechange', function () {
+            if (w.state === 'installed' && sw.controller) setReady();
+          });
+        });
+      }
+      function check() {
+        // 오프라인이거나 매니페스트가 없으면(개발 서버) 아무것도 하지 않는다(기존 등록 유지).
+        return fetch('precache_manifest.json', { cache: 'no-cache' })
+          .then(function (res) { return res.ok ? res.text() : Promise.reject(); })
+          .then(function (text) { return sw.register('app_sw.js?v=' + hash(text)); })
+          .then(watch)
+          .catch(function () {});
+      }
+      function appRegistrations() {
+        return sw.getRegistrations().then(function (regs) {
+          return regs.filter(function (r) {
+            return [r.active, r.waiting, r.installing].some(function (w) {
+              return w && w.scriptURL.indexOf('app_sw.js') !== -1;
+            });
+          });
+        });
+      }
+      window.petoryUpdate = {
+        isReady: function () { return ready; },
+        onReady: function (cb) { listeners.push(cb); },
+        check: check,
+        apply: function () {
+          return new Promise(function (resolve) {
+            var done = false;
+            function reload() { if (!done) { done = true; location.reload(); resolve(); } }
+            sw.addEventListener('controllerchange', reload);
+            var w = reg && reg.waiting;
+            if (w) w.postMessage('SKIP_WAITING'); else reload();
+            setTimeout(reload, 4000);
+          });
+        },
+        force: function () {
+          return appRegistrations()
+            .then(function (regs) { return Promise.all(regs.map(function (r) { return r.unregister(); })); })
+            .then(function () { return caches.keys(); })
+            .then(function (keys) {
+              return Promise.all(keys.filter(function (k) { return k.indexOf('petory-') === 0; })
+                .map(function (k) { return caches.delete(k); }));
+            })
+            .catch(function () {})
+            .then(function () { location.reload(); });
+        }
+      };
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('app_sw.js').catch(function () {});
+        check();
+        // 오래 켜 둔 앱도 새 버전을 알아채도록 30분마다, 그리고 앱으로 돌아올 때마다 확인한다.
+        setInterval(check, 30 * 60 * 1000);
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') check();
+        });
       });
-    }
+    })();
   </script>
 </body>
 </html>

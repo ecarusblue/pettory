@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'app/game_controller.dart';
+import 'data/app_updater.dart';
 import 'data/pet_repository.dart';
 import 'data/push_browser.dart';
 import 'data/push_client.dart';
@@ -20,6 +21,7 @@ Future<void> main() async {
     browser: createPushBrowser(),
     pushEnabled: cfg.enabled,
     vapidPublicKey: cfg.vapidPublicKey,
+    updater: createAppUpdater(),
   );
   await controller.init();
   runApp(PetoryApp(controller: controller));

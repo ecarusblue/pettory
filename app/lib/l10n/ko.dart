@@ -261,6 +261,15 @@ class Ko {
   static const soundTest = '소리 들어 보기';
   static const soundTestHint = '들리지 않으면 기기 음량을 올리고, 아이폰은 무음 스위치를 꺼 주세요';
   static const resetData = '데이터 초기화';
+  static const updateReadyTitle = '새 버전이 있어요';
+  static const updateReadyBody = '다시 시작하면 최신 버전으로 바뀌어요.';
+  static const updateRestart = '다시 시작';
+  static const forceRefresh = '강제 새로고침';
+  static const forceRefreshHint = '앱이 옛 버전으로 보일 때 눌러 주세요';
+  static const forceRefreshConfirmTitle = '강제로 새로고침할까요?';
+  static const forceRefreshConfirmBody =
+      '저장된 캐시를 지우고 최신 버전을 다시 받아요. 펫 데이터와 알림 설정은 그대로예요.';
+  static const refresh = '새로고침';
   static const resetConfirmTitle = '정말 초기화할까요?';
   static const resetConfirmBody = '펫과 모든 기록이 삭제돼요. 되돌릴 수 없어요.';
   static const cancel = '취소';

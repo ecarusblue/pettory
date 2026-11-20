@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../data/app_updater.dart';
+import '../data/app_updater_stub.dart';
 import '../data/game_save.dart';
 import '../data/pet_repository.dart';
 import '../data/push_browser.dart';
@@ -38,6 +40,7 @@ class GameController extends ChangeNotifier {
     this.browser = const UnsupportedPushBrowser(),
     this.pushEnabled = false,
     this.vapidPublicKey = '',
+    this.updater = const UnsupportedAppUpdater(),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
@@ -47,6 +50,9 @@ class GameController extends ChangeNotifier {
 
   /// 브라우저 Push API (웹 전용 구현은 조건부 import).
   final PushBrowser browser;
+
+  /// 앱 새 버전 감지/적용(웹 전용 구현은 조건부 import).
+  final AppUpdater updater;
 
   /// 서버 URL 과 VAPID 키가 모두 설정돼 푸시를 쓸 수 있는 빌드인가.
   final bool pushEnabled;

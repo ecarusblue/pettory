@@ -15,6 +15,7 @@ import 'play_sfx.dart';
 import 'poop_icon.dart';
 import 'settings_screen.dart';
 import 'theme.dart';
+import 'update_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.controller});
@@ -165,6 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
               children: [
+                UpdateBanner(controller: c),
                 Row(
                   children: [
                     Expanded(
