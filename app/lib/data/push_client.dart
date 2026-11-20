@@ -164,9 +164,9 @@ class HttpPushScheduleClient implements PushScheduleClient {
   @override
   Future<int?> serverTimeMs() async {
     try {
-      final r = await _client
-          .get(_u('/time'), headers: const {'cache-control': 'no-store'})
-          .timeout(timeout);
+      // 요청 헤더를 붙이지 않는다: 커스텀 헤더는 CORS preflight 를 일으키고 서버가 허용하지 않는다.
+      // 캐시는 서버 응답의 `cache-control: no-store` 가 막는다.
+      final r = await _client.get(_u('/time')).timeout(timeout);
       if (r.statusCode != 200) return null;
       final j = jsonDecode(r.body) as Map<String, dynamic>;
       final ms = j['epochMs'];
