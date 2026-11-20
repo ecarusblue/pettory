@@ -6,6 +6,9 @@ import '../l10n/ko.dart';
 import 'dex_screen.dart';
 import 'gauge.dart';
 import 'minigame_screen.dart';
+import 'catch_game_screen.dart';
+import 'cups_game_screen.dart';
+import 'memory_game_screen.dart';
 import '../data/sfx.dart';
 import 'pet_stage.dart';
 import 'play_sfx.dart';
@@ -80,11 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 놀기: 한도/수면을 먼저 확인하고, 선택 시트(기본 / 미니게임)를 띄운다.
   Future<void> _onPlay() async {
-    if (c.playLimitReached) {
-      playSfx(c, SfxKind.error);
-      _snack(Ko.playLimitReached);
-      return;
-    }
     if (c.pet?.asleep ?? false) {
       playSfx(c, SfxKind.error);
       _snack(Ko.careError(CareError.asleep));
@@ -93,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     playSfx(c, SfxKind.button); // 놀이 선택창이 열리는 순간
     final choice = await showModalBottomSheet<_PlayChoice>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: PetoryColors.bg,
       builder: (_) => const _PlaySheet(),
     );
@@ -101,13 +100,18 @@ class _HomeScreenState extends State<HomeScreen> {
       case _PlayChoice.basic:
         _do(CareAction.play);
       case _PlayChoice.minigame:
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => MinigameScreen(controller: c),
-          ),
-        );
+        await _openGame((_) => MinigameScreen(controller: c));
+      case _PlayChoice.catchGame:
+        await _openGame((_) => CatchGameScreen(controller: c));
+      case _PlayChoice.memory:
+        await _openGame((_) => MemoryGameScreen(controller: c));
+      case _PlayChoice.cups:
+        await _openGame((_) => CupsGameScreen(controller: c));
     }
   }
+
+  Future<void> _openGame(WidgetBuilder builder) =>
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: builder));
 
   @override
   Widget build(BuildContext context) {
@@ -346,7 +350,7 @@ class _CareButton extends StatelessWidget {
   }
 }
 
-enum _PlayChoice { basic, minigame }
+enum _PlayChoice { basic, minigame, catchGame, memory, cups }
 
 class _PlaySheet extends StatelessWidget {
   const _PlaySheet();
@@ -354,7 +358,7 @@ class _PlaySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -380,6 +384,27 @@ class _PlaySheet extends StatelessWidget {
               title: Ko.playMinigame,
               desc: Ko.playMinigameDesc,
               onTap: () => Navigator.of(context).pop(_PlayChoice.minigame),
+            ),
+            const SizedBox(height: 8),
+            _SheetOption(
+              icon: Icons.restaurant,
+              title: Ko.playCatch,
+              desc: Ko.playCatchDesc,
+              onTap: () => Navigator.of(context).pop(_PlayChoice.catchGame),
+            ),
+            const SizedBox(height: 8),
+            _SheetOption(
+              icon: Icons.style,
+              title: Ko.playMemory,
+              desc: Ko.playMemoryDesc,
+              onTap: () => Navigator.of(context).pop(_PlayChoice.memory),
+            ),
+            const SizedBox(height: 8),
+            _SheetOption(
+              icon: Icons.sports_bar,
+              title: Ko.playCups,
+              desc: Ko.playCupsDesc,
+              onTap: () => Navigator.of(context).pop(_PlayChoice.cups),
             ),
           ],
         ),

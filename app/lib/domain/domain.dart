@@ -3,6 +3,7 @@ export 'care.dart';
 export 'clock.dart';
 export 'egg.dart';
 export 'minigame.dart';
+export 'minigames.dart';
 export 'notifications.dart';
 export 'simulate.dart';
 export 'time_util.dart';

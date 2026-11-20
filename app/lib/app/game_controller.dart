@@ -286,9 +286,6 @@ class GameController extends ChangeNotifier {
     return p.dailyDay == day ? p.playCount : 0;
   }
 
-  /// 하루 놀아주기 한도(기본 + 미니게임 합산)에 도달했는가.
-  bool get playLimitReached => playsToday >= kDailyPlayLimit;
-
   CareResult care(CareAction action) {
     final p = _save.pet;
     if (p == null) return const CareResult.err(CareError.left, null, []);

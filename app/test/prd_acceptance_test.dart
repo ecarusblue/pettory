@@ -132,16 +132,14 @@ void main() {
       c.dispose();
     });
 
-    test('FR-5 놀아주기 하루 5회, 6번째는 dailyLimit', () async {
+    test('FR-5 놀아주기는 횟수 제한 없음 (6번째도 성공)', () async {
       final h = H();
       await h.seedPet();
       final c = await h.boot();
       for (var i = 0; i < 5; i++) {
         expect(c.care(CareAction.play).ok, isTrue, reason: '${i + 1}번째');
       }
-      final r = c.care(CareAction.play);
-      expect(r.error, CareError.dailyLimit);
-      expect(Ko.careError(CareError.dailyLimit), isNotEmpty);
+      expect(c.care(CareAction.play).ok, isTrue);
       c.dispose();
     });
   });
@@ -355,27 +353,6 @@ void main() {
       h.advance(const Duration(minutes: 81));
       await tester.pump();
       expect(find.text('3/4'), findsOneWidget); // hunger
-      c.dispose();
-    });
-
-    testWidgets('FR-5 한도 도달 시 안내 문구(스낵바) 표시', (tester) async {
-      bigView(tester);
-      final h = H();
-      await h.seedPet();
-      final c = await tester.runAsync(h.boot) as GameController;
-      await tester.pumpWidget(PetoryApp(controller: c));
-      await tester.pumpAndSettle();
-      // 놀기를 누르면 선택 시트(기본/미니게임)가 뜬다: 기본 놀아주기 5회 후 6번째는 시트 없이 안내
-      for (var i = 0; i < 5; i++) {
-        await tester.tap(find.text(Ko.play));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text(Ko.playBasic));
-        await tester.pumpAndSettle();
-      }
-      await tester.tap(find.text(Ko.play));
-      await tester.pumpAndSettle();
-      expect(find.text(Ko.playLimitReached), findsOneWidget);
-      expect(find.text(Ko.playBasic), findsNothing);
       c.dispose();
     });
 

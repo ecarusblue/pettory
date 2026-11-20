@@ -108,24 +108,20 @@ void main() {
       expect(find.text(Ko.mgStart), findsOneWidget);
     });
 
-    testWidgets('하루 5회 한도(기본+미니게임 합산) 도달 시 시트 없이 안내 문구로 차단', (tester) async {
+    testWidgets('놀아주기 횟수 제한 없음: 5회 넘어도 선택 시트가 열린다', (tester) async {
       bigView(tester);
       final c = await boot(tester);
-      // 기본 3회 + 미니게임 2회 = 5회
       for (var i = 0; i < 3; i++) {
         expect(c.care(CareAction.play).ok, isTrue);
       }
       for (var i = 0; i < 2; i++) {
         expect(c.care(CareAction.minigame(1)).ok, isTrue);
       }
-      expect(c.playLimitReached, isTrue);
       await tester.pumpWidget(PetoryApp(controller: c));
       await tester.pumpAndSettle();
       await tester.tap(find.text(Ko.play));
       await tester.pumpAndSettle();
-      expect(find.text(Ko.playLimitReached), findsOneWidget);
-      expect(find.text(Ko.playMinigame), findsNothing);
-      expect(find.text(Ko.mgStart), findsNothing);
+      expect(find.text(Ko.playMinigame), findsOneWidget);
       expect(c.pet!.playCount, 5);
     });
 
@@ -258,34 +254,6 @@ void main() {
       await waitForSignal(tester);
       expect(find.bySemanticsLabel(Ko.mgSignalAnnounce), findsOneWidget);
       handle.dispose();
-    });
-
-    testWidgets('결과 적용이 거부되면(한도 초과) 오류 문구를 보여 준다', (tester) async {
-      bigView(tester);
-      final c = await boot(tester, happiness: 1);
-      final clock = ManualClock();
-      await tester.pumpWidget(
-        wrap(MinigameScreen(controller: c, clock: clock, random: Random(6))),
-      );
-      await tester.tap(find.text(Ko.mgStart));
-      await tester.pump();
-      // 게임 도중 다른 경로로 한도를 모두 소진
-      for (var i = 0; i < 5; i++) {
-        expect(c.care(CareAction.play).ok, isTrue);
-      }
-      final before = c.pet!.happiness;
-      for (var i = 0; i < kMinigameRounds; i++) {
-        await playRound(tester, clock, 200);
-        await tester.tap(
-          find.text(
-            i == kMinigameRounds - 1 ? Ko.mgShowResult : Ko.mgNextRound,
-          ),
-        );
-        await tester.pump();
-      }
-      expect(find.text(Ko.mgNotApplied), findsOneWidget);
-      expect(find.text(Ko.careError(CareError.dailyLimit)), findsOneWidget);
-      expect(c.pet!.happiness, before);
     });
   });
 

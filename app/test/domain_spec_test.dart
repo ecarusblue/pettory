@@ -227,7 +227,7 @@ void main() {
       expect(applyCare(s2, kst, CareAction.medicine, t2).ok, isTrue);
     });
 
-    test('8c. 놀아주기 하루 5회 한도(미니게임 합산), 자정에 리셋', () {
+    test('8c. 놀아주기는 횟수 제한 없음(기본+미니게임), playCount는 자정에 리셋', () {
       var s = at(born(day0 + 23 * 60 - 120), noSleep, day0 + 23 * 60);
       for (var i = 0; i < 5; i++) {
         final r = applyCare(
@@ -240,13 +240,10 @@ void main() {
         s = r.state!;
       }
       expect(s.playCount, 5);
+      expect(applyCare(s, noSleep, CareAction.play, day0 + 23 * 60).ok, isTrue);
       expect(
-        applyCare(s, noSleep, CareAction.play, day0 + 23 * 60).error,
-        CareError.dailyLimit,
-      );
-      expect(
-        applyCare(s, noSleep, CareAction.minigame(1), day0 + 23 * 60).error,
-        CareError.dailyLimit,
+        applyCare(s, noSleep, CareAction.minigame(1), day0 + 23 * 60).ok,
+        isTrue,
       );
       final t2 = day0 + 1440 + 5;
       expect(

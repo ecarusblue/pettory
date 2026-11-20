@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>펫토리 미니게임 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E9F7EF;
+    --text: #1F2A44;
+    --accent: #FF7A66;
+    --accent-deep: #D9503C;
+    --card: #FFFFFF;
+    --hunger: #E08A1E;
+    --happy: #E5547A;
+    --tired: #3F7CD8;
+    --empty: #B9C4D6;
+    --page: #F6FBF8;
+    --ink-soft: #55607A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text);
+    font-family: 'Noto Sans KR', system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  main { max-width: 1160px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-family: 'Jua', sans-serif; font-weight: 400; font-size: 2rem; margin: 0 0 6px; }
+  .lead { margin: 0 0 32px; color: var(--ink-soft); max-width: 60ch; }
+  .row { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+  .game { width: 320px; }
+  .game h2 { font-family: 'Jua', sans-serif; font-weight: 400; font-size: 1.4rem; margin: 0 0 12px; }
+
+  /* 폰 프레임 */
+  .phone {
+    width: 320px; height: 560px;
+    background: var(--bg);
+    border: 3px solid var(--text);
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 6px 6px 0 var(--text);
+  }
+  .bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px 8px;
+    font-family: 'Jua', sans-serif; font-size: 1.1rem;
+  }
+  .bar .chip {
+    background: var(--card); border: 2px solid var(--text); border-radius: 999px;
+    padding: 0 12px; font-size: 1rem; line-height: 28px;
+  }
+  .meter { margin: 0 16px; height: 10px; background: var(--card); border: 2px solid var(--text); border-radius: 6px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--happy); }
+  .stage { position: relative; flex: 1; margin: 12px 16px 0; background: var(--card); border: 2px solid var(--text); border-radius: 16px; overflow: hidden; }
+  .hint { padding: 10px 16px 16px; text-align: center; font-size: 0.9rem; color: var(--ink-soft); min-height: 52px; }
+  .sprite { display: inline-block; line-height: 0; }
+  .sprite svg { shape-rendering: crispEdges; display: block; }
+
+  /* 먹이 받기 */
+  .sky { position: absolute; inset: 0; background: linear-gradient(#FFFFFF 0 70%, #D6F0E1 70% 100%); }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: #BFE7D0; border-top: 3px solid var(--text); }
+  .drop { position: absolute; top: -40px; animation: fall linear infinite; }
+  @keyframes fall { from { transform: translateY(0); } to { transform: translateY(360px); } }
+  .catcher { position: absolute; bottom: 52px; left: 0; animation: sway 6s ease-in-out infinite alternate; }
+  @keyframes sway { from { transform: translateX(18px); } to { transform: translateX(196px); } }
+  .plus { position: absolute; font-family: 'Jua', sans-serif; color: var(--hunger); font-size: 1.2rem; animation: pop 3.2s ease-out infinite; opacity: 0; }
+  @keyframes pop { 0% { opacity: 0; transform: translateY(0); } 8% { opacity: 1; } 40% { opacity: 0; transform: translateY(-26px); } 100% { opacity: 0; } }
+  .touchzone { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 0.8rem; color: var(--ink-soft); }
+
+  /* 짝 맞추기 */
+  .grid { position: absolute; inset: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 10px; }
+  .card { perspective: 400px; border: 0; background: none; padding: 0; cursor: pointer; }
+  .card .in { display: block; position: relative; width: 100%; height: 100%; transition: transform .35s; transform-style: preserve-3d; }
+  .card.up .in, .card.done .in { transform: rotateY(180deg); }
+  .face { display: grid; position: absolute; inset: 0; backface-visibility: hidden; border: 2px solid var(--text); border-radius: 12px; display: grid; place-items: center; }
+  .back { background: var(--accent); }
+  .front { background: #FFF6E5; transform: rotateY(180deg); }
+  .card.done .front { background: #DDF4E7; }
+  .card:focus-visible { outline: 3px solid var(--tired); outline-offset: 2px; border-radius: 12px; }
+
+  /* 숨은 공 찾기 */
+  .cups { position: absolute; left: 0; right: 0; top: 110px; height: 150px; }
+  .cup { position: absolute; top: 0; width: 76px; border: 0; background: none; padding: 0; cursor: pointer; transition: left .45s cubic-bezier(.5,0,.3,1); }
+  .cup .lid { transition: transform .3s; }
+  .cup.lift .lid { transform: translateY(-34px); }
+  .cup .ball { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); opacity: 0; transition: opacity .2s; }
+  .cup.lift .ball { opacity: 1; }
+  .cup:focus-visible { outline: 3px solid var(--tired); outline-offset: 4px; border-radius: 8px; }
+  .table { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: #FFE3B8; border-top: 3px solid var(--text); }
+  .say { position: absolute; top: 18px; left: 0; right: 0; text-align: center; font-family: 'Jua', sans-serif; font-size: 1.25rem; }
+  .petseat { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); }
+  .btn {
+    margin-top: 10px; font: inherit; font-family: 'Jua', sans-serif; font-size: 1rem;
+    background: var(--accent-deep); color: #fff; border: 2px solid var(--text); border-radius: 999px;
+    padding: 4px 18px; cursor: pointer; box-shadow: 2px 2px 0 var(--text);
+  }
+  .btn:active { transform: translate(2px, 2px); box-shadow: none; }
+  .btn:focus-visible { outline: 3px solid var(--tired); outline-offset: 2px; }
+
+  /* 규칙 표 */
+  dl { margin: 16px 0 0; font-size: 0.92rem; }
+  dt { font-weight: 700; margin-top: 8px; }
+  dd { margin: 0; color: var(--ink-soft); }
+  .tiers { display: flex; gap: 6px; margin-top: 8px; }
+  .tiers span { flex: 1; text-align: center; background: var(--card); border: 2px solid var(--text); border-radius: 10px; padding: 4px 2px; font-size: 0.82rem; line-height: 1.35; }
+  .tiers b { display: block; color: var(--happy); font-family: 'Jua', sans-serif; font-weight: 400; font-size: 1rem; }
+  .note { margin-top: 40px; padding: 14px 18px; background: var(--card); border: 2px solid var(--text); border-radius: 14px; max-width: 760px; margin-inline: auto; font-size: 0.92rem; }
+  .note p { margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drop, .catcher, .plus { animation: none; }
+    .drop { top: 40px; }
+    .catcher { transform: translateX(100px); }
+    .card .in, .cup, .cup .lid { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>미니게임 시안</h1>
+  <p class="lead">놀아주기 &gt; 미니게임에 추가할 후보 3종입니다. 기존 반응속도 게임처럼 한 판 30~60초이고, 결과는 행복 +0/+1/+2로 환산합니다. 카드와 컵은 눌러 볼 수 있습니다.</p>
+
+  <div class="row">
+
+    <!-- 1. 먹이 받기 -->
+    <section class="game" aria-labelledby="g1">
+      <h2 id="g1">먹이 받기</h2>
+      <div class="phone">
+        <div class="bar"><span>먹이 받기</span><span class="chip">받은 개수 7</span></div>
+        <div class="meter" role="img" aria-label="남은 시간 약 60%"><i style="width:60%;background:var(--tired)"></i></div>
+        <div class="stage">
+          <div class="sky"></div>
+          <div class="ground"></div>
+          <div class="drop" style="left:30px;animation-duration:3.4s;animation-delay:-1s"><span class="sprite" data-sprite="apple" data-s="5"></span></div>
+          <div class="drop" style="left:92px;animation-duration:2.6s;animation-delay:-2s"><span class="sprite" data-sprite="poop" data-s="5"></span></div>
+          <div class="drop" style="left:150px;animation-duration:3.1s;animation-delay:-0.2s"><span class="sprite" data-sprite="cookie" data-s="5"></span></div>
+          <div class="drop" style="left:214px;animation-duration:3.8s;animation-delay:-2.8s"><span class="sprite" data-sprite="apple" data-s="5"></span></div>
+          <div class="drop" style="left:250px;animation-duration:2.9s;animation-delay:-1.6s"><span class="sprite" data-sprite="poop" data-s="5"></span></div>
+          <div class="catcher"><span class="sprite" data-sprite="child" data-s="6"></span></div>
+          <span class="plus" style="left:90px;bottom:116px">+1</span>
+          <div class="touchzone">화면을 좌우로 끌어서 움직여요</div>
+        </div>
+        <p class="hint">음식은 받고, 똥은 피하세요.</p>
+      </div>
+      <dl>
+        <dt>방식</dt><dd>30초 동안 위에서 떨어지는 음식을 받습니다. 좌우로 드래그하거나 화면 양쪽을 눌러 움직입니다. 똥을 받으면 1점이 깎입니다.</dd>
+        <dt>점수 → 행복 (제안값)</dt>
+      </dl>
+      <div class="tiers"><span><b>+0</b>0~7개</span><span><b>+1</b>8~14개</span><span><b>+2</b>15개 이상</span></div>
+    </section>
+
+    <!-- 2. 짝 맞추기 -->
+    <section class="game" aria-labelledby="g2">
+      <h2 id="g2">짝 맞추기</h2>
+      <div class="phone">
+        <div class="bar"><span>짝 맞추기</span><span class="chip">시도 5 · 짝 2/6</span></div>
+        <div class="meter" role="img" aria-label="남은 시간 약 75%"><i style="width:75%;background:var(--tired)"></i></div>
+        <div class="stage">
+          <div class="grid" id="memgrid"></div>
+        </div>
+        <p class="hint">같은 그림 두 장을 찾으세요.</p>
+      </div>
+      <dl>
+        <dt>방식</dt><dd>카드 12장(6쌍)을 두 장씩 뒤집어 같은 그림을 찾습니다. 제한 시간은 60초이고, 틀리면 잠깐 보여 준 뒤 다시 뒤집힙니다.</dd>
+        <dt>시도 횟수 → 행복 (제안값)</dt>
+      </dl>
+      <div class="tiers"><span><b>+0</b>미완성 또는 19회 이상</span><span><b>+1</b>13~18회</span><span><b>+2</b>12회 이하</span></div>
+    </section>
+
+    <!-- 3. 숨은 공 찾기 -->
+    <section class="game" aria-labelledby="g3">
+      <h2 id="g3">숨은 공 찾기</h2>
+      <div class="phone">
+        <div class="bar"><span>숨은 공 찾기</span><span class="chip">3 / 5판</span></div>
+        <div class="meter" role="img" aria-label="맞힌 개수 2"><i style="width:40%"></i></div>
+        <div class="stage" style="background:#FFF6E5">
+          <div class="say" id="say">공은 어디에 있을까요?</div>
+          <div class="cups" id="cups"></div>
+          <div class="table"></div>
+          <div class="petseat"><span class="sprite" data-sprite="baby" data-s="7"></span></div>
+        </div>
+        <p class="hint">컵을 눌러 확인하세요.</p>
+      </div>
+      <div style="text-align:center"><button class="btn" id="shuffle" type="button">섞기</button></div>
+      <dl>
+        <dt>방식</dt><dd>공을 컵 밑에 넣고 섞은 뒤 어느 컵인지 맞힙니다. 5판을 하며 판이 갈수록 섞는 속도가 빨라지고 컵 수가 3개에서 4개로 늘어납니다.</dd>
+        <dt>맞힌 개수 → 행복 (제안값)</dt>
+      </dl>
+      <div class="tiers"><span><b>+0</b>0~1개</span><span><b>+1</b>2~3개</span><span><b>+2</b>4~5개</span></div>
+    </section>
+
+  </div>
+
+  <div class="note">
+    <p>세 게임 모두 화면 구성(상단 제목·진행 표시, 가운데 놀이판, 하단 안내 문구)을 기존 미니게임과 같게 맞췄습니다. 도형은 홈 화면 펫과 같은 픽셀 스프라이트로 그리므로 별도 이미지 파일이 필요 없습니다. 점수 구간은 플레이 테스트로 조정합니다.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var PAL = {
+    k: '#1F2A44', w: '#FFFFFF', r: '#E5483A', g: '#4CAF6A', y: '#F2C14E',
+    b: '#8A5A2B', o: '#E08A1E', p: '#E5547A', c: '#8EC9F5', t: '#C9A06B'
+  };
+  var PET = '#7FD6B0';
+  var S = {
+    apple: ['....g...','...g....','.rrrrrr.','rrwrrrrr','rrwrrrrr','rrrrrrrr','.rrrrrr.','..rr.rr.'],
+    cookie: ['..tttt..','.ttkttt.','tttttktt','tktttttt','ttttkttt','tttktttt','.tttttt.','..tttt..'],
+    poop: ['....b...','...bbb..','..bwbbb.','.bbbbbb.','.bkbbkb.','bbbbbbbb','bbbbbbbb','.bbbbbb.'],
+    ball: ['..pppp..','.ppwppp.','ppwppppp','pppppppp','pppppppp','pppppppp','.pppppp.','..pppp..'],
+    fish: ['........','..cccc.c','.ccwkccc','cccccccc','.cccccc.','..cccc.c','........','........'],
+    heart: ['........','.pp..pp.','pppppppp','pppppppp','.pppppp.','..pppp..','...pp...','........'],
+    star: ['...yy...','...yy...','yyyyyyyy','.yyyyyy.','..yyyy..','.yyyyyy.','.yy..yy.','........'],
+    baby: ['..######..','.########.','.#k####k#.','.########.','.###kk###.','..######..'],
+    child: ['.#......#.','.##....##.','.########.','##k####k##','##########','##########','.###kk###.','..######..']
+  };
+  function svg(name, scale) {
+    var g = S[name], h = g.length, w = g[0].length, out = '';
+    for (var y = 0; y < h; y++) for (var x = 0; x < g[y].length; x++) {
+      var ch = g[y][x]; if (ch === '.') continue;
+      var col = ch === '#' ? PET : PAL[ch]; if (!col) continue;
+      out += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + col + '"/>';
+    }
+    return '<svg width="' + w * scale + '" height="' + h * scale + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">' + out + '</svg>';
+  }
+  function paint(root) {
+    (root || document).querySelectorAll('[data-sprite]').forEach(function (el) {
+      el.innerHTML = svg(el.dataset.sprite, +el.dataset.s || 4);
+    });
+  }
+  paint();
+
+  /* 짝 맞추기 */
+  var faces = ['apple','cookie','ball','fish','heart','star'];
+  var deck = ['apple','fish','star','heart','cookie','ball','ball','star','apple','heart','fish','cookie'];
+  var done = {0:1, 8:1, 2:1, 7:1};  // 맞춘 두 쌍
+  var up = [];
+  var grid = document.getElementById('memgrid');
+  var cards = deck.map(function (f, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'card' + (done[i] ? ' done' : '');
+    b.setAttribute('aria-label', done[i] ? '맞춘 카드' : '뒤집지 않은 카드');
+    b.innerHTML = '<span class="in"><span class="face back"><svg width="20" height="20" viewBox="0 0 5 5" aria-hidden="true" style="shape-rendering:crispEdges"><g fill="#fff"><rect x="1" y="0" width="3" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="2" y="2" width="2" height="1"/><rect x="2" y="4" width="1" height="1"/></g></svg></span><span class="face front"><span class="sprite" data-sprite="' + f + '" data-s="5"></span></span></span>';
+    b.addEventListener('click', function () {
+      if (done[i] || up.indexOf(i) > -1 || up.length > 1) return;
+      b.classList.add('up'); up.push(i);
+      if (up.length === 2) {
+        var a = up[0], c = up[1];
+        if (deck[a] === deck[c]) { done[a] = done[c] = 1; cards[a].classList.add('done'); cards[c].classList.add('done'); up = []; }
+        else setTimeout(function () { cards[a].classList.remove('up'); cards[c].classList.remove('up'); up = []; }, 900);
+      }
+    });
+    grid.appendChild(b); return b;
+  });
+  paint(grid);
+  cards[4].classList.add('up'); up = [4];  // 한 장 뒤집힌 상태로 시작
+
+  /* 숨은 공 찾기 */
+  var cupsEl = document.getElementById('cups'), say = document.getElementById('say');
+  var pos = [18, 104, 190], ball = 1, order = [0, 1, 2], busy = false;
+  var cupEls = [0, 1, 2].map(function (i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'cup'; b.setAttribute('aria-label', '컵 ' + (i + 1));
+    b.innerHTML = '<span class="ball sprite" data-sprite="ball" data-s="5"></span><span class="lid"><svg width="76" height="84" viewBox="0 0 19 21" aria-hidden="true" style="shape-rendering:crispEdges"><path d="M3 0h13l3 21H0z" fill="#E5547A"/><path d="M3 0h13v2H3z" fill="#F28AA6"/><path d="M5 5h2v12H5z" fill="#fff" opacity=".45"/><path d="M0 19h19v2H0z" fill="#B93A5E"/></svg></span>';
+    b.addEventListener('click', function () {
+      if (busy) return;
+      cupEls.forEach(function (c) { c.classList.remove('lift'); });
+      b.classList.add('lift');
+      if (i === ball) { say.textContent = '맞았어요!'; }
+      else { say.textContent = '아쉬워요, 여기엔 없어요.'; cupEls[ball].classList.add('lift'); }
+    });
+    cupsEl.appendChild(b); return b;
+  });
+  paint(cupsEl);
+  function place() { order.forEach(function (slot, i) { cupEls[i].style.left = pos[slot] + 'px'; }); }
+  place();
+  document.getElementById('shuffle').addEventListener('click', function () {
+    if (busy) return; busy = true;
+    cupEls.forEach(function (c) { c.classList.remove('lift'); });
+    cupEls[ball].classList.add('lift');
+    say.textContent = '공을 잘 보세요';
+    var n = 0;
+    setTimeout(function () {
+      cupEls[ball].classList.remove('lift');
+      var t = setInterval(function () {
+        var a = Math.floor(Math.random() * 3), b = (a + 1 + Math.floor(Math.random() * 2)) % 3;
+        var tmp = order[a]; order[a] = order[b]; order[b] = tmp; place();
+        if (++n >= 6) { clearInterval(t); busy = false; say.textContent = '공은 어디에 있을까요?'; }
+      }, 520);
+    }, 900);
+  });
+})();
+</script>
+</body>
+</html>

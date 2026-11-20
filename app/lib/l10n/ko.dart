@@ -151,11 +151,54 @@ class Ko {
   static const playSheetTitle = '어떻게 놀아 줄까요?';
   static const playBasic = '기본 놀아주기';
   static const playBasicDesc = '행복 +1';
-  static const playMinigame = '미니게임';
-  static const playMinigameDesc = '반응속도 게임 · 행복 +0~2';
-  static const playLimitReached =
-      '오늘은 충분히 놀았어요. 하루 5번까지만 놀 수 있어요. 내일 또 놀아 주세요.';
-  static String playsLeft(int left, int limit) => '오늘 남은 놀아주기 $left/$limit';
+  static const playMinigame = '반응속도 게임';
+  static const playMinigameDesc = '신호에 맞춰 탭하기 · 행복 +0~2';
+  static const playCatch = '먹이 받기';
+  static const playCatchDesc = '떨어지는 음식 받기 · 행복 +0~2';
+  static const playMemory = '짝 맞추기';
+  static const playMemoryDesc = '같은 그림 찾기 · 행복 +0~2';
+  static const playCups = '숨은 공 찾기';
+  static const playCupsDesc = '공이 든 컵 맞히기 · 행복 +0~2';
+
+  // 먹이 받기
+  static const catchTitle = '먹이 받기';
+  static const catchIntro = '30초 동안 떨어지는 음식을 받으세요.\n똥을 받으면 점수가 깎여요.';
+  static String catchScore(int n) => '받은 점수 $n';
+  static String catchTimeLeft(int s) => '남은 시간 $s초';
+  static const catchHint = '화면을 좌우로 끌거나 아래 버튼으로 움직여요';
+  static const catchLeft = '왼쪽으로';
+  static const catchRight = '오른쪽으로';
+  static String catchResultLine(int n) => '받은 점수 $n점';
+
+  // 짝 맞추기
+  static const memoryTitle = '짝 맞추기';
+  static const memoryIntro = '카드 12장에서 같은 그림 두 장씩 찾으세요.\n60초 안에 모두 찾아야 해요.';
+  static String memoryStatus(int attempts, int pairs, int total) =>
+      '시도 $attempts · 짝 $pairs/$total';
+  static const memoryHint = '같은 그림 두 장을 찾으세요';
+  static const memoryNames = ['사과', '쿠키', '공', '생선', '하트', '별'];
+  static String memoryCardDown(int n) => '카드 $n번, 뒤집지 않음';
+  static String memoryCardUp(int n, String name) => '카드 $n번, $name';
+  static String memoryCardDone(int n, String name) => '카드 $n번, $name (짝 맞춤)';
+  static const memoryCompleted = '모두 찾았어요!';
+  static const memoryTimeUp = '시간이 다 됐어요';
+  static String memoryResultLine(int attempts, int pairs, int total) =>
+      '시도 $attempts번 · 찾은 짝 $pairs/$total';
+
+  // 숨은 공 찾기
+  static const cupsTitle = '숨은 공 찾기';
+  static String cupsIntro(int rounds) =>
+      '공이 든 컵을 잘 보세요.\n컵이 섞이면 공이 있는 컵을 맞혀 보세요.\n총 $rounds판이에요.';
+  static String cupsRound(int n, int total) => '$n/$total판';
+  static const cupsWatch = '공을 잘 보세요';
+  static const cupsShuffling = '섞는 중…';
+  static const cupsPick = '공은 어디에 있을까요?';
+  static const cupsRight = '맞았어요!';
+  static const cupsWrong = '아쉬워요. 여기엔 없어요.';
+  static const cupsNext = '다음 판';
+  static String cupsCupLabel(int n) => '컵 $n';
+  static String cupsResultLine(int correct, int total) =>
+      '$correct/$total판 맞혔어요';
 
   static const mgTitle = '반응속도 게임';
   static String mgIntro(int rounds) =>

@@ -2,9 +2,6 @@ import 'simulate.dart';
 import 'time_util.dart';
 import 'types.dart';
 
-/// 놀아주기(기본 + 미니게임) 하루 합계 한도.
-const int kDailyPlayLimit = 5;
-
 enum CareKind { feed, snack, play, minigame, cleanPoop, sleep, medicine, wake }
 
 enum CareError {
@@ -94,7 +91,6 @@ CareResult applyCare(PetState state, Settings cfg, CareAction action, int now) {
       );
     case CareKind.play:
     case CareKind.minigame:
-      if (s.playCount >= kDailyPlayLimit) return fail(CareError.dailyLimit);
       s = s.copyWith(
         happiness: _clamp4(
           s.happiness + (k == CareKind.play ? 1 : action.minigameGain),

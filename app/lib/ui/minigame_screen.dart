@@ -142,11 +142,6 @@ class _MinigameScreenState extends State<MinigameScreen> {
           style: t.bodyLarge,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 12),
-        Text(
-          Ko.playsLeft(kDailyPlayLimit - c.playsToday, kDailyPlayLimit),
-          style: t.titleSmall,
-        ),
         const SizedBox(height: 24),
         FilledButton(
           style: FilledButton.styleFrom(minimumSize: const Size(200, 56)),
