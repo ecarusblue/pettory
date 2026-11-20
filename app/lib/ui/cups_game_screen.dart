@@ -31,7 +31,6 @@ class CupsGameScreen extends StatefulWidget {
 class _CupsGameScreenState extends State<CupsGameScreen> {
   GameController get c => widget.controller;
   static const double _cupW = 72;
-  static const double _stageH = 260;
 
   _Phase _phase = _Phase.intro;
   int _round = 0; // 0부터
@@ -188,12 +187,13 @@ class _CupsGameScreenState extends State<CupsGameScreen> {
                               .round(),
                         ),
                         curve: Curves.easeInOut,
-                        top: 90,
+                        // 탁자(높이 110) 위에 컵 바닥이 살짝 걸치도록 놓는다.
+                        bottom: 70,
                         left:
                             (_order.indexOf(cup) + 0.5) * (w / _cfg.cups) -
                             cupW / 2,
                         width: cupW,
-                        height: _stageH - 90 - 80,
+                        height: cupW * 1.1,
                         child: _cup(cup, cupW),
                       ),
                   ],
