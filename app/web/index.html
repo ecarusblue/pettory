@@ -86,7 +86,10 @@
           var w = r.installing;
           if (!w) return;
           w.addEventListener('statechange', function () {
-            if (w.state === 'installed' && sw.controller) setReady();
+            // 내용이 같은 워커는 설치 직후 스스로 활성화되므로(app_sw.js), 잠시 뒤에도 대기 중일 때만 새 버전으로 본다.
+            if (w.state === 'installed' && sw.controller) {
+              setTimeout(function () { if (r.waiting) setReady(); }, 1500);
+            }
           });
         });
       }

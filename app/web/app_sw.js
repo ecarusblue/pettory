@@ -37,7 +37,12 @@ self.addEventListener('install', (event) => {
       const list = (await res.json()).entries.filter((e) => wanted(e.url));
       const name = PREFIX + hashString(list.map((e) => e.url + ':' + e.hash).sort().join('|'));
       const meta = await caches.open(META);
-      if (await caches.has(name)) return meta.put(PENDING, new Response(name));
+      if (await caches.has(name)) {
+        await meta.put(PENDING, new Response(name));
+        // 지금 쓰는 캐시와 내용이 같다면(스크립트 URL 만 바뀐 경우) 기다릴 이유가 없다: 바로 교체해 '새 버전' 안내가 뜨지 않게 한다.
+        if ((await readMeta(CURRENT)) === name) await self.skipWaiting();
+        return;
+      }
       const cache = await caches.open(name);
       try {
         // 하나라도 실패하면 전체 실패(반쪽 캐시 방지). 'reload' 로 HTTP 캐시를 우회해 새 파일을 받는다.
